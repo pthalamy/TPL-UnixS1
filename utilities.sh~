@@ -1,0 +1,11 @@
+html_head () {
+    echo "Fonction html_head not implemented"
+}
+
+html_title () {
+    echo "Fonction html_title not implemented"
+}
+
+html_tail () {
+    echo "Fonction html_tail not implemented"
+}
