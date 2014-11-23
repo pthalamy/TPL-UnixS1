@@ -24,7 +24,7 @@ utilisation: generate-img-fragment.sh [OPTIONS] SOURCE DEST
              -dr  --dry-run          \texecution "a sec"
              -h,  --help             \taffiche ce message
              -mf, --main-file FICHIER\tSpecifie le nom du fichier html de sortie
-             -s,  --src REP          \tRepertoire contenant les images JPEG 
+             -s,  --source REP          \tRepertoire contenant les images JPEG 
                                      \ta miniaturiser
              -d,  --dest REP         \tRepertoire cible pour vignettes 
                                      \tet fichier html                    
@@ -39,10 +39,10 @@ while test $# -ne 0; do
             help
             exit 0
             ;;
-        "--src" | "-s")
+        "--source" | "--src" | "-s")
             shift; src="${1%/}"
             ;;
-        "--dest" | "-d")
+        "--destination" | "--dest" | "-d")
             shift; dest="${1%/}"
             ;;
         "--main-file" | "-mf")
@@ -135,13 +135,34 @@ printf "\n* Ecriture des images dans le fichier HTMl...\n"
 echo "cd $dest" >&3
 $dry_run cd "$dest"
 
+while true; do
+    echo "Voulez vous entrer des legendes pour chaque image ? [oO | (nN)]"
+    read legendMode
+    case "$legendMode" in
+	"o" | "O" | "Oui")
+	    break
+	    ;;
+	"n" | "N" | "Non")
+	    break
+	    ;;
+	'')
+	    legendMode='n'; break
+	    ;;
+	*)
+	    echo "Veuillez repondre par oui ou non."
+	    ;;
+    esac
+done
+
 for img in images/*; do
     imageName=$(basename "$img")
-    
-    echo "--> Veuillez entrer la legende de l'image $imageName: "
-    $dry_run read legend
+
+    if ! [ $legendMode = 'n' -o $legendMode = 'N' ]; then
+	echo "--> Veuillez entrer la legende de l'image $imageName: "
+	$dry_run read legend
+    fi
 	
-    printf "generate-img-fragment.sh vignettes/vg-$imageName" \
+    printf "generate-img-fragment.sh vignettes/vg-$imageName " \
 	"images/$imageName " >&3
     printf "$imageName $legend > $main_file \n" >&3
 
