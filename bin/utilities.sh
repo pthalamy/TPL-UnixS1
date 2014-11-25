@@ -45,6 +45,14 @@ html_title () {
     echo "<div>Cliquez sur une vignette pour l'agrandir.</div>"
 }
 
+html_viewer_title () {
+    echo "<h1>$1</h1>"
+}
+
+html_viewer_title () {
+    echo "<h1>$1</h1>"
+}
+
 html_tail () {
     echo "</body>"
     echo "</html>"
