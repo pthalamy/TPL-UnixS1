@@ -1,19 +1,32 @@
 # Source and destination directories, to be configured here:
-SOURCE=../exemples-html/galerie_style/
+SOURCE=./images
 DEST=./dest
 
 
 IMAGES=${shell cd $(SOURCE) && echo *.jpg}
-THUMBS=$(IMAGES:%=$(DEST)/%)
+THUMBS=$(IMAGES:%=$(DEST)/vg-%)
 IMAGE_DESC=$(IMAGES:%.jpg=$(DEST)/%.inc)
 
 
 # TODO
-gallery:
+$(DEST)/%.inc: $(DEST)/vg-%.jpg
+	./bin/generate-img-fragment_simple.sh vg-$*.jpg vg-$*.jpg > $@
 
+$(DEST)/index.html: $(IMAGE_DESC)
+	./bin/generate-index.sh $^ > $@
+
+$(DEST)/vg-%.jpg: $(SOURCE)/%.jpg
+	convert -thumbnail 320x240 $< $@
+
+.PHONY: gallery
+gallery: $(DEST)/index.html $(THUMBS)
+
+.PHONY: view
 view:
 
+.PHONY: clean
 clean:
+	rm -rf $(DEST)/*
 
 # Simplified version of exiftags's Makefile
 EXIFTAGS_OBJS=exiftags-1.01/exif.o exiftags-1.01/tagdefs.o exiftags-1.01/exifutil.o \
@@ -30,4 +43,3 @@ EXIFTAGS_HDRS=exiftags-1.01/exif.h exiftags-1.01/exifint.h \
 
 ./exiftags: $(EXIFTAGS_OBJS)
 	$(CC) $(CFLAGS) -o $@ $(EXIFTAGS_OBJS) -lm
-
