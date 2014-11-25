@@ -162,9 +162,9 @@ for img in images/*; do
 	$dry_run read legend
     fi
 	
-    printf "generate-img-fragment.sh vignettes/vg-$imageName " \
-	"images/$imageName " >&3
-    printf "$imageName $legend > $main_file \n" >&3
+    printf "generate-img-fragment.sh vignettes/vg-%s " \
+	"images/%s " "$imageName" "$imageName" >&3
+    printf "%s $s > %s \n >&3" "$imageName" "$legend" "$main_file"
 
     if [ $dry_run ]; then 
 	echo "$DIR"/generate-img-fragment.sh vignettes/vg-"$imageName" \
@@ -179,5 +179,6 @@ $dry_run cd "$DIR"
 
 if [ $dry_run ]; then echo 'html_tail >&5'; else html_tail >&5; fi
 
-printf "\n* Fini: Le fichier html genere est disponible ici: $dest/$main_file\n"
+printf "\n* Fini: Le fichier html genere est disponible ici: %s/%s \n" \
+    "$dest" "$main_file"
 exit 0
