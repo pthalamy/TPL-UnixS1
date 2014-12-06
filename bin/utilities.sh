@@ -15,8 +15,17 @@ EOF
       background-color: #f1f6df;
       }
 
-      .imgframe {
+      .vgframe {
       float: left;
+      background-color: white;
+      border: dashed 1px #BBDDBB;
+      margin: 1ex;
+      padding: 1ex;
+      text-align:center;
+      }
+
+      .imgframe {
+      float: center;
       background-color: white;
       border: dashed 1px #BBDDBB;
       margin: 1ex;
@@ -33,6 +42,7 @@ EOF
       font-style:italic;
       color: #002000;
       }
+
     </style>
     
   </head>
@@ -41,19 +51,19 @@ EOF
 }
 
 html_title () {
-    echo "<h1>$1</h1>"
-    echo "<div>Cliquez sur une vignette pour l'agrandir.</div>"
+    echo "<h1>$1</h1>
+          <div>Cliquez sur une vignette pour l'agrandir.</div>"
 }
 
 html_viewer_title () {
-    echo "<h1>$1</h1>"
-}
-
-html_viewer_title () {
-    echo "<h1>$1</h1>"
+    echo '<h1 align="center">'"$1"'</h1>'
 }
 
 html_tail () {
-    echo "</body>"
-    echo "</html>"
+    echo '
+  <footer align="right">
+  –– Guillaume Halb & Pierre Thalamy
+  <footer>
+  </body>
+</html>'
 }
