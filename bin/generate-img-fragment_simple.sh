@@ -10,7 +10,7 @@ usage () {
 
 if [ $# -ge 2 ]; then
     echo '<div class="imgframe">'
-    echo '<a href='"$(basename $2).html"' target="_blank">'
+    echo '<a href='"$(basename $2)"' target="_blank">'
     echo '<img class="image" src="'"$1"'" alt="'"$alt"'"><br>'
     echo '</a>'
     echo '<span class="legend">'"$legend"'</span>'
