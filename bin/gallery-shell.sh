@@ -93,6 +93,9 @@ fi
 if ! [ -d "$dest/vignettes/" ]; then
     $dry_run mkdir "$dest/vignettes/"
 fi
+if ! [ -d "$dest/viewers/" ]; then
+    $dry_run mkdir "$dest/viewers/"
+fi
 
 ## Ecriture du fichier HTML
 # Ouverture du fichier de sortie sur le desc 5
@@ -132,7 +135,6 @@ done
 # Ecriture des images dans le fichier HTMl
 printf "\n* Ecriture des images dans le fichier HTMl...\n"
 
-echo "cd $dest" >&3
 $dry_run cd "$dest"
 
 while true; do
@@ -161,17 +163,24 @@ for img in images/*; do
 	echo "--> Veuillez entrer la legende de l'image $imageName: "
 	$dry_run read legend
     fi
-	
-    printf "generate-img-fragment.sh vignettes/vg-%s " \
-	"images/%s " "$imageName" "$imageName" >&3
-    printf "%s $s > %s \n >&3" "$imageName" "$legend" "$main_file"
+
+    printf "generate-img-fragment.sh vignettes/vg-%s images/%s " \
+     	"$imageName" "$imageName" >&3
+    printf "%s %s > %s \n" "$imageName" "$legend" "$main_file" >&3
+
+    viewerName=$(basename "$imageName" .jpg).html
 
     if [ $dry_run ]; then 
 	echo "$DIR"/generate-img-fragment.sh vignettes/vg-"$imageName" \
-	    images/"$imageName" "$imageName" "$legend"' >&5'
+	    "$viewerName"' >&5'
+
+	echo "$DIR"'/generate-viewer.sh '"$imageName $legend $main_file" \
+	    '> viewers/'"$viewerName"
     else
 	"$DIR"/generate-img-fragment.sh vignettes/vg-"$imageName" \
-	    images/"$imageName" "$imageName" "$legend" >&5
+	    "$viewerName" "$legend" >&5
+	"$DIR"/generate-viewer.sh "$imageName" "$legend" "$main_file" \
+	    > viewers/"$viewerName"
     fi
 done
 
