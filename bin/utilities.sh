@@ -73,9 +73,10 @@ html_tail () {
 # Format: JJ/MM/AAAA
 exif_date () {
     # On évite les msgs d'erreur inutiles de exiftags
-    exec 2>/dev/null 
-
-    date=$("$DIR"/exiftags "$1" \
+    # exec 2>/dev/null 
+    echo $(pwd)
+    
+    date=$("$DIR"/exiftags "$2" \
 	| grep "Image Created:" \
 	| cut -f3 -d " ")
     year=$(echo $date | cut -f1 -d ":")
