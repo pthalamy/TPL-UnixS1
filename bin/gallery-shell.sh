@@ -100,8 +100,8 @@ init () {
 
     # Vérification que exiftags est compilé
     if ! [ -f "$DIR"/exiftags  ]; then
-	echo "./exiftags n'existe pas, on le compile: " >&2
-	(cd exiftags && make)
+	echo "./exiftags n'existe pas, on le compile... " >&2
+	(cd exiftags-1.01 && make && mv exiftags "$DIR")
     fi
 
     ## Si la verbose est inactive, redirection de nos sorties vers /dev/null
@@ -167,14 +167,6 @@ include_images () {
     for img in images/*; do
 	imageName=$(basename "$img")
 	viewerName=$(basename "$imageName" .jpg).html
-
-	# Formatage de la date pour la légende
-	date=$(exif_date "$img")
-	if ! [ "$date" = "//"  ]; then
-	    legend="$(basename "$img" .jpg) – $date"
-	else
-	    legend="$(basename "$img" .jpg)"
-	fi
 
 	if [ "$dry_run" != '' -o "$verbose" -eq 1 ]; then 
 	    echo "$DIR"/generate-img-fragment.sh vignettes/vg-"$imageName" \
