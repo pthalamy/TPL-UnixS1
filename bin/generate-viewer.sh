@@ -6,7 +6,7 @@ BIN=$(cd "$(dirname "$0")" && pwd)
 
 title="Image Viewer"
 index="$DIR"/"$3"
-legend="– $2"
+legend="$2"
 
 usage () {
     cat <<EOF
@@ -37,7 +37,7 @@ html_viewer_title "$title"
 echo '<center>'
 echo '<div class="imgframe">'
 echo '<img class="image" src="'"$DIR/images/$1"'"><br>'
-echo '<span class="legend">'"$(basename $current .jpg) $legend"'</span>'
+echo '<span class="legend">'"$legend"'</span>'
 echo '</div>' 
 echo '</center>'
 
