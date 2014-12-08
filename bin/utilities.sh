@@ -67,3 +67,20 @@ html_tail () {
   </body>
 </html>'
 }
+
+# Prend un fichier jpg en argument et renvoi par un echo 
+# la date exif de prise de vue de l'image si présente.
+# Format: JJ/MM/AAAA
+exif_date () {
+    # On évite les msgs d'erreur inutiles de exiftags
+    exec 2>/dev/null 
+
+    date=$("$DIR"/exiftags "$1" \
+	| grep "Image Created:" \
+	| cut -f3 -d " ")
+    year=$(echo $date | cut -f1 -d ":")
+    month=$(echo $date | cut -f2 -d ":")
+    day=$(echo $date | cut -f3 -d ":")
+
+    echo "$day/$month/$year"
+}
