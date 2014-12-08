@@ -1,42 +1,45 @@
 # Source and destination directories, to be configured here:
-SOURCE=./exif-images
+SOURCE=./exifimages
 DEST=./dest
 BIN=./bin
 
 IMAGES=${shell cd $(SOURCE) && echo *.jpg}
-THUMBS=$(IMAGES:%=$(DEST)/vg-%)
-IMAGE_DESC=$(IMAGES:%.jpg=$(DEST)/%.inc)
-IMAGE_VIEWER=$(IMAGES:%.jpg=$(DEST)/%.html)
+THUMBS=$(IMAGES:%=$(DEST)/vignettes/vg-%)
+IMAGE_DESC=$(IMAGES:%.jpg=$(DEST)/includes/%.inc)
+IMAGE_VIEWER=$(IMAGES:%.jpg=$(DEST)/viewers/%.html)
 
 # TODO
-$(DEST)/%.inc: $(DEST)/vg-%.jpg exiftags
-	./bin/generate-img-fragment_simple.sh vg-$*.jpg vg-$*.jpg \
-	"$*" "$* - $($(BIN)/exiftags $(SOURCE)/$*.jpg | grep 'Equipment Make')" > $@
-
-$(DEST)/index.html: $(IMAGE_DESC)
-	./bin/generate-index.sh $^ > $@
-
-$(DEST)/vg-%.jpg: $(SOURCE)/%.jpg
-	convert -thumbnail 320x240 $< $@
-
-$(DEST)/%.html: $(SOURCE)/%.jpg
-	mv $< $(DEST)
-	./bin/generate-viewer.sh $*.jpg
-
 .PHONY: gallery
-gallery: $(DEST)/index.html $(THUMBS)
+gallery: init $(DEST)/index.html $(THUMBS)
 
 .PHONY: view
 view: gallery
 	open $(DEST)/index.html
 
+.PHONY: init
+init: 
+	$(BIN)/create_tree.sh $(DEST)
+
+$(DEST)/index.html: $(IMAGE_DESC)
+	./bin/generate-index.sh $^ > $@
+
+$(DEST)/vignettes/vg-%.jpg: $(SOURCE)/%.jpg
+	convert -thumbnail 320x240 $< $@
+
+$(DEST)/includes/%.inc: $(DEST)/vg-%.jpg exiftags
+	./bin/generate-img-fragment.sh $(DEST)/vg-$*.jpg $(DEST)/$*.html > $@
+
+$(DEST)/viewers/%.html: $(SOURCE)/%.jpg
+	mv $< $(DEST)/images/
+	./bin/generate-viewer.sh $(DEST)/images/$*.jpg index.html > $@
+
 .PHONY: clean
 clean:
-	@rm -f $(THUMBS) $(IMAGE_DESC) $(DEST)/index.html
+	@rm -f $(THUMBS) $(IMAGE_DESC) $(IMAGE_VIEWERS) $(DEST)/index.html 
 
 .PHONY: realclean
 realclean: clean
-	@rm -f $(EXIFTAGS_OBJS) $(BIN)/exiftags
+	@rm -rf $(DEST) $(EXIFTAGS_OBJS) $(BIN)/exiftags
 
 # Simplified version of exiftags's Makefile
 EXIFTAGS_OBJS=exiftags-1.01/exif.o exiftags-1.01/tagdefs.o exiftags-1.01/exifutil.o \
