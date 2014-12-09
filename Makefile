@@ -1,45 +1,56 @@
 # Source and destination directories, to be configured here:
 SOURCE=./exifimages
 DEST=./dest
-BIN=./bin
 
-IMAGES=${shell cd $(SOURCE) && echo *.jpg}
-THUMBS=$(IMAGES:%=$(DEST)/vignettes/vg-%)
-IMAGE_DESC=$(IMAGES:%.jpg=$(DEST)/includes/%.inc)
-IMAGE_VIEWER=$(IMAGES:%.jpg=$(DEST)/viewers/%.html)
+SOURCE_IMAGES=${shell cd $(SOURCE) && echo *.jpg}
+DEST_IMAGES=$(SOURCE_IMAGES:%=$(DEST)/images/%)
+THUMBS=$(SOURCE_IMAGES:%=$(DEST)/vignettes/vg-%)
+
+IMAGE_DESCS=$(SOURCE_IMAGES:%.jpg=$(DEST)/includes/%.inc)
+IMAGE_VIEWERS=$(SOURCE_IMAGES:%.jpg=$(DEST)/viewers/%.html)
+
+TREE_DIRS=$(DEST)/vignettes/ $(DEST)/viewers/ $(DEST)/images/ $(DEST)/includes/
 
 # TODO
 .PHONY: gallery
-gallery: init $(DEST)/index.html $(THUMBS)
+gallery: $(DEST) ./exiftags $(TREE_DIRS) $(DEST)/index.html $(THUMBS) $(IMAGE_VIEWERS) $(DEST_IMAGES)
 
 .PHONY: view
-view: gallery
+view: gallery 
 	open $(DEST)/index.html
 
-.PHONY: init
-init: 
-	$(BIN)/create_tree.sh $(DEST)
+$(TREE_DIRS): 
+	mkdir $@
 
-$(DEST)/index.html: $(IMAGE_DESC)
-	./bin/generate-index.sh $^ > $@
+$(DEST):
+	mkdir $@
+
+$(DEST)/index.html: $(IMAGE_DESCS)
+	./generate-index.sh $^ > $@
 
 $(DEST)/vignettes/vg-%.jpg: $(SOURCE)/%.jpg
 	convert -thumbnail 320x240 $< $@
 
-$(DEST)/includes/%.inc: $(DEST)/vg-%.jpg exiftags
-	./bin/generate-img-fragment.sh $(DEST)/vg-$*.jpg $(DEST)/$*.html > $@
+$(DEST)/includes/%.inc: $(DEST)/vignettes/vg-%.jpg $(DEST)/viewers/%.html
+	./generate-img-fragment.sh $(DEST)/vignettes/vg-$*.jpg \
+		./viewers/$*.html > $@
 
-$(DEST)/viewers/%.html: $(SOURCE)/%.jpg
-	mv $< $(DEST)/images/
-	./bin/generate-viewer.sh $(DEST)/images/$*.jpg index.html > $@
+$(DEST)/viewers/%.html: $(DEST)/images/%.jpg $(DEST_IMAGES)
+	./generate-viewer.sh $(DEST)/ $(DEST)/images/$*.jpg \
+		$(realpath DEST)/index.html > $@
+
+$(DEST)/images/%.jpg: $(SOURCE)/%.jpg
+	cp $(SOURCE)/$*.jpg $(DEST)/images/
 
 .PHONY: clean
 clean:
-	@rm -f $(THUMBS) $(IMAGE_DESC) $(IMAGE_VIEWERS) $(DEST)/index.html 
+	@rm -f $(THUMBS) $(IMAGE_DESCS) $(IMAGE_VIEWERS) $(DEST_IMAGES)
+	@rm -f $(DEST)/index.html
+	@rmdir $(TREE_DIRS)
 
 .PHONY: realclean
-realclean: clean
-	@rm -rf $(DEST) $(EXIFTAGS_OBJS) $(BIN)/exiftags
+realclean: 
+	@rm -rf $(DEST) $(EXIFTAGS_OBJS) ./exiftags
 
 # Simplified version of exiftags's Makefile
 EXIFTAGS_OBJS=exiftags-1.01/exif.o exiftags-1.01/tagdefs.o exiftags-1.01/exifutil.o \
@@ -54,7 +65,5 @@ EXIFTAGS_HDRS=exiftags-1.01/exif.h exiftags-1.01/exifint.h \
 %.o: %.c $(EXIFTAGS_HDRS)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-$(BIN)/exiftags: $(EXIFTAGS_OBJS)
+./exiftags: $(EXIFTAGS_OBJS)
 	$(CC) $(CFLAGS) -o $@ $(EXIFTAGS_OBJS) -lm
-
-exiftags: $(BIN)/exiftags
