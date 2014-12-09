@@ -1,20 +1,20 @@
 #! /bin/sh
 
-alt="$3"
-legend="$4"
+DIR=$(cd "$(dirname "$0")" && pwd)
+. "$DIR"/utilities.sh
 
 usage () {
-    echo 'usage: generate-img-fragment.sh vignette viewerName' >&2
+    echo 'usage: generate-img-fragment.sh vignette viewer' >&2
 }
 
-if [ $# -ge 1 ]; then
-    if ! [ -r $1 ]; then
+if [ $# -ne 1 ]; then
+    if ! [ -r "$1" ]; then
 	echo "generate-img-fragment.sh: Le fichier $1 n'existe pas." >&2
 	exit 1;
     else
 	echo '<div class="vgframe">'
-	echo '<a href='"viewers/$2"' target="_top">'
-	echo '<img class="image" src='"$1"'><br>'
+	echo '<a href='"$2"' target="_top">'
+	echo '<img class="image" src='$(FileRelative2Absolute "$1")'><br>'
 	echo '</a>'
 	echo '</div>'
     fi

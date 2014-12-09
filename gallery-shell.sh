@@ -46,7 +46,7 @@ parse_args () {
 		shift; src="${1%/}"
 		;;
             "--destination" | "--dest" | "-d")
-		shift; dest="${1%/}"
+		shift; dest=$(cd "${1%/}" && pwd)
 		;;
             "--main-file" | "-mf")
 		shift; main_file="$1"
@@ -162,23 +162,25 @@ generate_thumbs () {
 include_images () {
     printf "\n* Ecriture des images dans le fichier HTMl...\n"
     
-    $dry_run cd "$dest"
-
-    for img in images/*; do
+    for img in "$dest"/images/*; do
 	imageName=$(basename "$img")
 	viewerName=$(basename "$imageName" .jpg).html
 
 	if [ "$dry_run" != '' -o "$verbose" -eq 1 ]; then 
-	    echo "$DIR"/generate-img-fragment.sh vignettes/vg-"$imageName" \
-		"$viewerName"' >&5'
+	    echo "$DIR"'/generate-img-fragment.sh' \
+		"$dest/vignettes/vg-$imageName"	\
+		./viewers/"$viewerName "'>&5'
 
-	    echo "$DIR"'/generate-viewer.sh '"$imageName $legend $main_file" \
-		'> viewers/'"$viewerName"
-	else
-	    "$DIR"/generate-img-fragment.sh vignettes/vg-"$imageName" \
-		"$viewerName" "$legend" >&5
-		"$DIR"/generate-viewer.sh "$imageName" "$legend" "$main_file" \
-		    > viewers/"$viewerName"
+	    echo "$DIR"'/generate-viewer.sh '"$dest $imageName" \
+		"$dest/$main_file "'>' "$dest/viewers/$viewerName"
+	fi
+
+	if [ "$dry_run" = '' ]; then
+	    "$DIR"/generate-img-fragment.sh "$dest/vignettes/vg-$imageName" \
+		./viewers/"$viewerName" >&5
+	    
+	    "$DIR"/generate-viewer.sh  "$dest" "$img" "$dest/$main_file" \
+		> "$dest"/viewers/"$viewerName"
 	fi
     done
 }

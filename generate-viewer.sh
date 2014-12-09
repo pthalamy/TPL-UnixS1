@@ -1,18 +1,16 @@
 #! /bin/sh
 
-BIN=$(cd "$(dirname "$0")" && pwd)
-. "$BIN"/utilities.sh
-
-DEST="$(pwd)"
-DIR="$DEST/.."
+DIR=$(cd "$(dirname "$0")" && pwd)
+DEST=$(cd "$1" && pwd)
+. "$DIR"/utilities.sh
 
 title="Image Viewer"
-index="$DEST"/"$3"
+index="$3"
 legend=""
 
 usage () {
     cat <<EOF
-Utilisation: generate-viewer.sh image indexName
+Utilisation: generate-viewer.sh dest image index
 EOF
 }
 
@@ -20,7 +18,7 @@ EOF
 img_list=$(cd "$DEST"/images && ls)
 
 # Récuperation de la première et dernière image de la liste
-current="$1"
+current=$(basename "$2") 
 first=$(echo $img_list | cut -f1 -d ' ')
 for _last in $img_list; do true; done # !Hack!
 last="$_last"
@@ -32,8 +30,8 @@ next=$(echo "$img_list" | grep "$current" -A 1 | tail -n 1)
 next=${next%.*}
 
 # Formatage de la date pour la légende
-date=$(exif_date "$DEST/images/$current") 
-echo '$DEST'"=$DEST" >&2
+date=$(exif_date "$DIR" "$DEST/images/$current") 
+
 if ! [ "$date" = "//"  ]; then
     legend="$(basename "$current" .jpg) – $date"
 else
@@ -47,7 +45,7 @@ html_viewer_title "$title"
 # Affichage du code HTML
 echo '<center>'
 echo '<div class="imgframe">'
-echo '<img class="image" src="'"$DEST/images/$1"'"><br>'
+echo '<img class="image" src="'$(FileRelative2Absolute "$2")'"><br>'
 echo '<span class="legend">'"$legend"'</span>'
 echo '</div>' 
 echo '</center>'
@@ -59,10 +57,10 @@ else
     echo '<center><b>Précédent</b>'
 fi
   
-echo '<a href='"$index"' align="center">Index</a>'
+echo '<a href='"$index"'>Index</a>'
 
 if ! [ "$current" = "$last" ]; then
-    echo '<a href='"$DEST/viewers/$next"'.html align="center">
+    echo '<a href='"$DEST/viewers/$next"'.html>
 Suivant</a></center>'
 else
     echo '<b>Suivant</b></center>'
