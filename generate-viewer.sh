@@ -17,24 +17,17 @@ EOF
 # Listing des images présentes 
 img_list=$(cd "$DEST"/images && ls *.jpg)
 
-echo '$img_list='"$img_list" >&2
-
 # Récuperation de la première et dernière image de la liste
 current="$(basename "$2")"
-echo '$current='"$current" >&2
-first=$(echo "$img_list" | cut -f1 -d ' ')
+first=$(echo $img_list | cut -f1 -d ' ')
 for _last in $img_list; do true; done # !Hack!
 last="$_last"
 
 prev=$(echo "$img_list" | grep -F "$current" -B 1 | head -n 1)
-echo '$prev0='"$prev" >&2
 prev=${prev%.*}
-echo '$prev='"$prev" >&2
 
 next=$(echo "$img_list" | grep -F "$current" -A 1 | tail -n 1)
 next=${next%.*}
-echo '$next='"$next" >&2
-
 
 # Formatage de la date pour la légende
 date=$(exif_date "$DIR" "$DEST/images/$current") 
@@ -59,21 +52,20 @@ echo '</center>'
 
 # Affichage des menus de navigation
 if ! [ "$current" = "$first" ]; then
-    echo '<center><a href='"$DEST/viewers/$prev"'.html>Précédent</a>'
+    echo '<center><a href="'"$DEST/viewers/$prev.html"'">Précédent</a>'
 else 
     echo '<center><b>Précédent</b>'
 fi
   
-echo '<a href='"$index"'>Index</a>'
+echo '<a href="'"$index"'">Index</a>'
 
 if ! [ "$current" = "$last" ]; then
-    echo '<a href='"$DEST/viewers/$next"'.html>
-Suivant</a></center>'
+    echo '<a href="'"$DEST/viewers/$next.html"'">Suivant</a></center>'
 else
     echo '<b>Suivant</b></center>'
 fi
 
 # Balises de fin
-html_tail
+html_viewer_tail
 
 exit 0
