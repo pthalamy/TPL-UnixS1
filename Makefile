@@ -2,7 +2,7 @@
 SOURCE=./exifimages
 DEST=./dest
 
-SOURCE_IMAGES=${shell cd $(SOURCE) && echo *.jpg}
+SOURCE_IMAGES=${shell ./secure_names.sh && cd $(SOURCE) && echo *.jpg}
 DEST_IMAGES=$(SOURCE_IMAGES:%=$(DEST)/images/%)
 THUMBS=$(SOURCE_IMAGES:%=$(DEST)/vignettes/vg-%)
 
@@ -13,7 +13,8 @@ TREE_DIRS=$(DEST)/vignettes/ $(DEST)/viewers/ $(DEST)/images/ $(DEST)/includes/
 
 # TODO
 .PHONY: gallery
-gallery: $(DEST) ./exiftags $(TREE_DIRS) $(DEST)/index.html $(THUMBS) $(IMAGE_VIEWERS) $(DEST_IMAGES)
+gallery: $(DEST) ./exiftags $(TREE_DIRS) $(DEST)/index.html \
+	$(THUMBS) $(IMAGE_VIEWERS) $(DEST_IMAGES)
 
 .PHONY: view
 view: gallery 
@@ -28,12 +29,12 @@ $(DEST):
 $(DEST)/index.html: $(IMAGE_DESCS)
 	./generate-index.sh $^ > $@
 
-$(DEST)/vignettes/vg-%.jpg: $(SOURCE)/%.jpg
-	convert -thumbnail 320x240 $< $@
-
 $(DEST)/includes/%.inc: $(DEST)/vignettes/vg-%.jpg $(DEST)/viewers/%.html
 	./generate-img-fragment.sh $(DEST)/vignettes/vg-$*.jpg \
 		./viewers/$*.html > $@
+
+$(DEST)/vignettes/vg-%.jpg: $(SOURCE)/%.jpg
+	convert -thumbnail 320x240 $< $@
 
 $(DEST)/viewers/%.html: $(DEST)/images/%.jpg $(DEST_IMAGES)
 	./generate-viewer.sh $(DEST)/ $(DEST)/images/$*.jpg \
@@ -41,12 +42,13 @@ $(DEST)/viewers/%.html: $(DEST)/images/%.jpg $(DEST_IMAGES)
 
 $(DEST)/images/%.jpg: $(SOURCE)/%.jpg
 	cp $(SOURCE)/$*.jpg $(DEST)/images/
+	convert -resize "1000x725>" $(DEST)/images/$*.jpg \
+		$(DEST)/images/$*.jpg	
 
 .PHONY: clean
 clean:
 	@rm -f $(THUMBS) $(IMAGE_DESCS) $(IMAGE_VIEWERS) $(DEST_IMAGES)
 	@rm -f $(DEST)/index.html
-	@rmdir $(TREE_DIRS)
 
 .PHONY: realclean
 realclean: 
