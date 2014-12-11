@@ -16,6 +16,8 @@ EOF
       }
 
       .vgframe {
+      height: 250px;
+      width: 330px;
       float: left;
       background-color: white;
       border: dashed 1px #BBDDBB;
@@ -27,10 +29,13 @@ EOF
       .imgframe {
       float: center;
       text-align:center;
+      height: 800px;
+      width: 1250px;
       }
 
       .image {
       margin: 1ex;
+      float: center;
       border: solid 1px lightgrey;
       }
 
@@ -94,7 +99,7 @@ exif_date () {
 # Usage: FileRelative2Absolute file
 FileRelative2Absolute () {
     FILE_DIR=$(cd $(dirname "$1") && pwd) 
-    FILE_BASE=$(basename "$1")
+    FILE_BASE="$(basename "$1")"
     
     echo "$FILE_DIR"/"$FILE_BASE"
 }
