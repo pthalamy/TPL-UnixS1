@@ -17,17 +17,24 @@ EOF
 # Listing des images présentes 
 img_list=$(cd "$DEST"/images && ls *.jpg)
 
+echo '$img_list='"$img_list" >&2
+
 # Récuperation de la première et dernière image de la liste
 current="$(basename "$2")"
-first=$(echo $img_list | cut -f1 -d ' ')
+echo '$current='"$current" >&2
+first=$(echo "$img_list" | cut -f1 -d ' ')
 for _last in $img_list; do true; done # !Hack!
 last="$_last"
 
-prev=$(echo "$img_list" | grep "$current" -B 1 | head -n 1)
+prev=$(echo "$img_list" | grep -F "$current" -B 1 | head -n 1)
+echo '$prev0='"$prev" >&2
 prev=${prev%.*}
+echo '$prev='"$prev" >&2
 
-next=$(echo "$img_list" | grep "$current" -A 1 | tail -n 1)
+next=$(echo "$img_list" | grep -F "$current" -A 1 | tail -n 1)
 next=${next%.*}
+echo '$next='"$next" >&2
+
 
 # Formatage de la date pour la légende
 date=$(exif_date "$DIR" "$DEST/images/$current") 
