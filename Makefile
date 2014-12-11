@@ -2,6 +2,8 @@
 SOURCE=./exifimages
 DEST=./dest
 
+# Renommage des images du dossier source si celles-ci comportent 
+# un espace dans leur nom.
 SOURCE_IMAGES=${shell ./secure_names.sh && cd $(SOURCE) && echo *.jpg}
 DEST_IMAGES=$(SOURCE_IMAGES:%=$(DEST)/images/%)
 THUMBS=$(SOURCE_IMAGES:%=$(DEST)/vignettes/vg-%)
@@ -11,38 +13,37 @@ IMAGE_VIEWERS=$(SOURCE_IMAGES:%.jpg=$(DEST)/viewers/%.html)
 
 TREE_DIRS=$(DEST)/vignettes/ $(DEST)/viewers/ $(DEST)/images/ $(DEST)/includes/
 
-# TODO
 .PHONY: gallery
-gallery: $(DEST) ./exiftags $(TREE_DIRS) $(DEST)/index.html \
-	$(THUMBS) $(IMAGE_VIEWERS) $(DEST_IMAGES)
+gallery: $(TREE_DIRS) $(DEST)/index.html $(IMAGE_VIEWERS) $(DEST_IMAGES) \
+	$(THUMBS)
 
 .PHONY: view
 view: gallery 
 	open $(DEST)/index.html
 
-$(TREE_DIRS): 
+$(TREE_DIRS): $(DEST) 
 	mkdir $@
 
 $(DEST):
 	mkdir $@
 
-$(DEST)/index.html: $(IMAGE_DESCS)
+$(DEST)/index.html: $(IMAGE_DESCS) 
 	./generate-index.sh $^ > $@
 
-$(DEST)/includes/%.inc: $(DEST)/vignettes/vg-%.jpg $(DEST)/viewers/%.html
+$(DEST)/includes/%.inc: $(TREE_DIRS)
 	./generate-img-fragment.sh $(DEST)/vignettes/vg-$*.jpg \
 		./viewers/$*.html > $@
 
-$(DEST)/vignettes/vg-%.jpg: $(SOURCE)/%.jpg
+$(DEST)/vignettes/vg-%.jpg: $(SOURCE)/%.jpg $(TREE_DIRS)
 	convert -thumbnail 320x240 $< $@
 
-$(DEST)/viewers/%.html: $(DEST)/images/%.jpg $(DEST_IMAGES)
-	./generate-viewer.sh $(DEST)/ $(DEST)/images/$*.jpg \
+$(DEST)/viewers/%.html: $(DEST)/images/%.jpg $(TREE_DIRS) ./exiftags
+	./generate-viewer.sh $(DEST)/ $< \
 		$(realpath DEST)/index.html > $@
 
-$(DEST)/images/%.jpg: $(SOURCE)/%.jpg
+$(DEST)/images/%.jpg: $(SOURCE)/%.jpg $(TREE_DIRS)
 	cp $(SOURCE)/$*.jpg $(DEST)/images/
-	convert -resize "1000x725>" $(DEST)/images/$*.jpg \
+	convert -resize "800x600>" $(DEST)/images/$*.jpg \
 		$(DEST)/images/$*.jpg	
 
 .PHONY: clean
@@ -50,8 +51,8 @@ clean:
 	@rm -f $(THUMBS) $(IMAGE_DESCS) $(IMAGE_VIEWERS) $(DEST_IMAGES)
 	@rm -f $(DEST)/index.html
 
-.PHONY: realclean
-realclean: 
+.PHONY: wipeout
+wipeout: 
 	@rm -rf $(DEST) $(EXIFTAGS_OBJS) ./exiftags
 
 # Simplified version of exiftags's Makefile
