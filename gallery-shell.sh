@@ -106,8 +106,8 @@ init () {
 
     # Vérification que exiftags est compilé
     if ! [ -f "$DIR"/exiftags  ]; then
-	echo "./exiftags n'existe pas, on le compile... " >&2
-	(cd exiftags-1.01 && make && mv exiftags "$DIR")
+	echo "$DIR/exiftags n'existe pas, on le compile... " >&2
+	(cd "$DIR"/exiftags-1.01 && make && mv exiftags "$DIR")
     fi
 
     ## Si la verbose est inactive, redirection de nos sorties vers /dev/null
@@ -119,7 +119,7 @@ init () {
     if [ $dry_run ]; then 
 	echo 'exec 5> $dest/$main_file'
     else
-	exec 5> "$dest/$main_file"
+	exec 5> "$dest"/"$main_file"
     fi
     
     if [ "$verbose" = 1 ]; then
@@ -148,18 +148,18 @@ generate_thumbs () {
 	filename="$(basename "$file")"
 
 	# Copie de l'image dans $dest/images/ si inexistante
-	# Et redimensionnement si trop grande pour l'affichage
-	if ! [ -f "$dest/images/$filename" ]; then
+	# Et redimensionnement si plus grande que 800x600
+	if ! [ -f "$dest"/images/"$filename" ]; then
 	    echo "cp $file $dest/images" >&3
 	    $dry_run cp "$file" "$dest"/images/
-	    echo 'convert -resize "1000x725>" '"$dest/images/$filename" \
+	    echo 'convert -resize "800x600>" '"$dest/images/$filename" \
 		"$dest/images/$filename"
-	    $dry_run convert -resize "1000x725>" "$dest/images/$filename" \
-		"$dest/images/$filename"
+	    $dry_run convert -resize "800x600>" "$dest"/images/"$filename" \
+		"$dest"/images/"$filename"
 	fi
 	
 	# Si la vignette n'existe pas, la creer
-	if [ -f "$dest/vignettes/vg-$filename" ]; then
+	if [ -f "$dest"/vignettes/vg-"$filename" ]; then
             echo "$dest/vignettes/vg-$filename existe deja, on l'ignore..." >&3
 	else 
 	    echo "convert -thumbnail 320x240 $file $dest/vignettes/vg-$filename" >&3
@@ -179,18 +179,18 @@ include_images () {
 
 	if [ "$dry_run" != '' -o "$verbose" -eq 1 ]; then 
 	    echo "$DIR"'/generate-img-fragment.sh' \
-		"$dest/vignettes/vg-$imageName"	\
-		./viewers/"$viewerName "'>&5'
+		"$dest"/vignettes/vg-"$imageName"	\
+		./viewers/"$viewerName"'>&5'
 
 	    echo "$DIR"'/generate-viewer.sh '"$dest $imageName" \
 		"$dest/$main_file "'>' "$dest/viewers/$viewerName"
 	fi
 
 	if [ "$dry_run" = '' ]; then
-	    "$DIR"/generate-img-fragment.sh "$dest/vignettes/vg-$imageName" \
+	    "$DIR"/generate-img-fragment.sh "$dest"/vignettes/vg-"$imageName" \
 		./viewers/"$viewerName" >&5
 	    
-	    "$DIR"/generate-viewer.sh  "$dest" "$img" "$dest/$main_file" \
+	    "$DIR"/generate-viewer.sh  "$dest" "$img" "$dest"/"$main_file" \
 		> "$dest"/viewers/"$viewerName"
 	fi
     done
@@ -214,7 +214,7 @@ echo "
                  --------- Script Gallerie Shell ---------
 "
 
-parse_args $@
+parse_args "$@"
 init
 
 print_index_header
