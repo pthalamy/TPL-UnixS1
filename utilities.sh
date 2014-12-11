@@ -16,8 +16,6 @@ EOF
       }
 
       .vgframe {
-      height: 250px;
-      width: 330px;
       float: left;
       background-color: white;
       border: dashed 1px #BBDDBB;
@@ -29,8 +27,8 @@ EOF
       .imgframe {
       float: center;
       text-align:center;
-      height: 800px;
-      width: 1250px;
+      height: 650px;
+      width: 850px;
       }
 
       .image {
@@ -49,6 +47,11 @@ EOF
       color: #002000;
       }
 
+      .vg-legend {
+      font-style:italic;
+      color: #002000;
+      }
+
     </style>
     
   </head>
@@ -57,9 +60,13 @@ EOF
 }
 
 html_title () {
-    echo "<h1>$1</h1>
-          <div>Cliquez sur une vignette voir l'image en taille réelle" \
-	      " et afficher ses infos.</div>"
+    echo "<h1 align=\"center\">$1</h1>
+          <div align=\"center\" style=\"font-style:italic;\">" \
+	      "Cliquez sur une vignette voir l'image en taille réelle" \
+	      " et afficher ses infos."
+    echo "<br>
+          <p align=\"right\">–– Guillaume Halb & Pierre Thalamy</p>
+          </div>"
 }
 
 html_viewer_title () {
@@ -68,9 +75,14 @@ html_viewer_title () {
 
 html_tail () {
     echo '
-  <footer align="right">
-  –– Guillaume Halb & Pierre Thalamy
-  <footer>
+  </body>
+</html>'
+}
+
+html_viewer_tail () {
+    echo '
+  <br>
+<p align="right">–– Guillaume Halb & Pierre Thalamy</p>
   </body>
 </html>'
 }
