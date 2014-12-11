@@ -13,8 +13,8 @@ if [ $# -ne 1 ]; then
 	exit 1;
     else
 	echo '<div class="vgframe">'
-	echo '<a href='"$2"' target="_top">'
-	echo '<img class="image" src='$(FileRelative2Absolute "$1")'><br>'
+	echo '<a href="'$2'" target="_top">'
+	echo '<img class="image" src="'$(FileRelative2Absolute "$1")'"><br>'
 	echo '</a>'
 	echo '</div>'
     fi
