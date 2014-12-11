@@ -4,3 +4,7 @@
 *.inc
 **/*.jpg
 **/#*
+Rapport/*.aux
+Rapport/*.log
+Rapport/*.pdf
+exiftags
