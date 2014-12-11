@@ -10,6 +10,7 @@ dest=''
 title="Galerie d'images"
 verbose=0
 dry_run='' # dry_run inactif par defaut
+open=0
 main_file='index.html' 
 
 usage () {
@@ -31,6 +32,7 @@ utilisation: generate-img-fragment.sh [OPTIONS] SOURCE DEST
              -d,  --dest REP         \tRepertoire cible pour vignettes 
                                      \tet fichier html                    
              -t,  --title TITRE      \tTitre de la page
+             -o,  --open             \tOuvre directement la galerie
 EOF
 }
 
@@ -46,7 +48,11 @@ parse_args () {
 		shift; src="${1%/}"
 		;;
             "--destination" | "--dest" | "-d")
-		shift; dest=$(cd "${1%/}" && pwd)
+		shift; 
+		if ! [ -d "$1" ]; then
+		    mkdir "$1"
+		fi
+		dest=$(cd "${1%/}" && pwd)
 		;;
             "--main-file" | "-mf")
 		shift; main_file="$1"
@@ -59,6 +65,9 @@ parse_args () {
 		;;
             "--verbose" | "-v")
 		verbose=1
+		;;
+	    "-o" | "--open")
+	        open=1
 		;;
             *)
 		echo "erreur: Argument non reconnu : $1"
@@ -85,9 +94,6 @@ init () {
     fi
 
     # Creation de l'arborescence du site si inexistante
-    if ! [ -d "$dest" ]; then
-	$dry_run mkdir "$dest"
-    fi
     if ! [ -d "$dest/images/" ]; then
 	$dry_run mkdir "$dest/images/"
     fi
@@ -139,12 +145,17 @@ generate_thumbs () {
     printf "* Generation des vignettes... \n"
 
     for file in "$src"/*; do
-	filename=$(basename "$file")
+	filename="$(basename "$file")"
 
 	# Copie de l'image dans $dest/images/ si inexistante
+	# Et redimensionnement si trop grande pour l'affichage
 	if ! [ -f "$dest/images/$filename" ]; then
 	    echo "cp $file $dest/images" >&3
 	    $dry_run cp "$file" "$dest"/images/
+	    echo 'convert -resize "1000x725>" '"$dest/images/$filename" \
+		"$dest/images/$filename"
+	    $dry_run convert -resize "1000x725>" "$dest/images/$filename" \
+		"$dest/images/$filename"
 	fi
 	
 	# Si la vignette n'existe pas, la creer
@@ -152,7 +163,7 @@ generate_thumbs () {
             echo "$dest/vignettes/vg-$filename existe deja, on l'ignore..." >&3
 	else 
 	    echo "convert -thumbnail 320x240 $file $dest/vignettes/vg-$filename" >&3
-	    $dry_run convert -thumbnail 320x240 \
+	    $dry_run convert -thumbnail '320x240' \
 		"$file" "$dest/vignettes/vg-$filename"
 	fi
     done
@@ -193,6 +204,12 @@ print_index_footer () {
     fi
 }
 
+open_gallery () {
+    if [ "$open" -eq 1 ]; then
+	open "$dest"/"$main_file"
+    fi
+}
+
 echo "
                  --------- Script Gallerie Shell ---------
 "
@@ -211,5 +228,7 @@ printf "\n* Fini: Le fichier html genere est disponible ici: %s/%s \n" \
     "$dest" "$main_file"
 echo "
                   -- Par Guillaume Halb & Pierre Thalamy --"
+
+open_gallery
 
 exit 0
