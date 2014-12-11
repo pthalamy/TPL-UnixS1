@@ -15,10 +15,10 @@ EOF
 }
 
 # Listing des images présentes 
-img_list=$(cd "$DEST"/images && ls)
+img_list=$(cd "$DEST"/images && ls *.jpg)
 
 # Récuperation de la première et dernière image de la liste
-current=$(basename "$2") 
+current="$(basename "$2")"
 first=$(echo $img_list | cut -f1 -d ' ')
 for _last in $img_list; do true; done # !Hack!
 last="$_last"
