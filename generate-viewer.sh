@@ -11,6 +11,8 @@ legend=""
 usage () {
     cat <<EOF
 Utilisation: generate-viewer.sh dest image index
+Crée un page HTML contenant l'image et des boutons de navigation pour
+l'accés aux autres éléments de la galerie.
 EOF
 }
 
@@ -49,8 +51,6 @@ echo '<img class="image" src="'"$(FileRelative2Absolute "$2")"'"><br>'
 echo '<span class="legend">'"$legend"'</span>'
 echo '</div>' 
 echo '</center>'
-
-echo '$current='"$current"' $first='"$first">&2
 
 # Affichage des menus de navigation
 if ! [ "$current" = "$first" ]; then

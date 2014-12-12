@@ -19,7 +19,7 @@ gallery: $(TREE_DIRS) $(DEST)/index.html $(DEST_IMAGES) \
 
 .PHONY: view
 view: gallery 
-	open $(DEST)/index.html
+	firefox $(DEST)/index.html
 
 $(TREE_DIRS): $(DEST) 
 	mkdir $@

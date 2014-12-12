@@ -8,6 +8,7 @@ title="Galerie d'images"
 usage () {
     cat <<EOF
 Utilisation: generate-index.sh <includes>
+Crée une page HTML contenant en body le contenu de tous les fichiers en arg.
 EOF
 }
 

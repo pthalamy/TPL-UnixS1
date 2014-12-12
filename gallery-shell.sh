@@ -6,6 +6,7 @@ DIR=$(cd "$(dirname "$0")" && pwd)
 
 # Variables globales
 src=''
+unsafe_dest=''
 dest=''
 title="Galerie d'images"
 verbose=0
@@ -45,14 +46,12 @@ parse_args () {
 		exit 0
 		;;
             "--source" | "--src" | "-s")
-		shift; src=$(cd "${1%/}" && pwd)
+		shift; 
+		src="$(cd "${1%/}" && pwd)"
 		;;
             "--destination" | "--dest" | "-d")
 		shift; 
-		if ! [ -d "$1" ]; then
-		    mkdir "$1"
-		fi
-		dest=$(cd "${1%/}" && pwd)
+		unsafe_dest="$1"
 		;;
             "--main-file" | "-mf")
 		shift; main_file="$1"
@@ -82,10 +81,39 @@ parse_args () {
 # Initialise les elements nécessaires au script en fonction 
 # des résultats du parsing
 init () {
+    # On transforme le dest passé en argument en son chemin absolu et le crée
+    # si nécessaire
+    if ! [ -d "$unsafe_dest" ]; then
+	$dry_run mkdir "$unsafe_dest"
+    fi
+    if [ "$dry_run" = "" ]; then
+	dest="$(cd "${unsafe_dest%/}" && pwd)"
+    else
+	dest="${unsafe_dest%/}"
+    fi
+
     # On doit avoir au minimum le repertoire source et dest comme arguments
     if [ "$src" = "" -o "$dest" = "" ]; then
 	echo "erreur: Il manque un ou plusieurs arguments." >&2
 	usage; exit 1
+    fi
+
+    ## Si la verbose est inactive, redirection de nos sorties vers /dev/null
+    # 1: stdout
+    # 2: stderr
+    # 3: verbose stdout
+    # 4: verbose stderr
+    # 5: fichier html
+    if [ $dry_run ]; then 
+	echo 'exec 5> $dest/$main_file'
+    else
+	exec 5> "$dest"/"$main_file"
+    fi
+    
+    if [ "$verbose" = 1 ]; then
+	exec 4>&2 3>&1
+    else
+	exec 4>/dev/null 3>/dev/null
     fi
 
     # Notification d'activation du dry_run
@@ -107,25 +135,7 @@ init () {
     # Vérification que exiftags est compilé
     if ! [ -f "$DIR"/exiftags  ]; then
 	echo "$DIR/exiftags n'existe pas, on le compile... " >&2
-	(cd "$DIR"/exiftags-1.01 && make && mv exiftags "$DIR")
-    fi
-
-    ## Si la verbose est inactive, redirection de nos sorties vers /dev/null
-    # 1: stdout
-    # 2: stderr
-    # 3: verbose stdout
-    # 4: verbose stderr
-    # 5: fichier html
-    if [ $dry_run ]; then 
-	echo 'exec 5> $dest/$main_file'
-    else
-	exec 5> "$dest"/"$main_file"
-    fi
-    
-    if [ "$verbose" = 1 ]; then
-	exec 4>&2 3>&1
-    else
-	exec 4>/dev/null 3>/dev/null
+	(cd "$DIR"/exiftags-1.01 && make && mv exiftags "$DIR" ) > /dev/null
     fi
 }
 
@@ -145,6 +155,11 @@ generate_thumbs () {
     printf "* Generation des vignettes... \n"
 
     for file in "$src"/*.jpg; do
+
+	if [ "$file" = "$src"'/*.jpg' ]; then # Pas d'images dans source
+	    continue;
+	fi;
+
 	filename="$(basename "$file")"
 
 	# Copie de l'image dans $dest/images/ si inexistante
@@ -152,9 +167,9 @@ generate_thumbs () {
 	if ! [ -f "$dest"/images/"$filename" ]; then
 	    echo "cp $file $dest/images" >&3
 	    $dry_run cp "$file" "$dest/images/"
-	    echo 'convert -resize "800x600>" '"$dest/images/$filename" \
-		"$dest/images/$filename"
-	    $dry_run convert -resize "800x600>" "$dest/images/$filename" \
+	    echo 'convert -resize "650x412>" '"$dest/images/$filename" \
+		"$dest/images/$filename" >&3
+	    $dry_run convert -resize "650x412>" "$dest/images/$filename" \
 		"$dest/images/$filename"
 	fi
 	
@@ -174,6 +189,10 @@ include_images () {
     printf "\n* Ecriture des images dans le fichier HTMl...\n"
     
     for img in "$dest"/images/*; do
+	if [ "$img" = "$dest"'/images/*' ]; then # Pas d'images dans source
+	    continue;
+	fi;
+
 	imageName=$(basename "$img")
 	viewerName=$(basename "$imageName" .jpg).html
 
@@ -206,7 +225,7 @@ print_index_footer () {
 
 open_gallery () {
     if [ "$open" -eq 1 ]; then
-	open "$dest"/"$main_file"
+        firefox "$dest"/"$main_file"
     fi
 }
 

@@ -4,7 +4,8 @@ DIR=$(cd "$(dirname "$0")" && pwd)
 . "$DIR"/utilities.sh
 
 usage () {
-    echo 'usage: generate-img-fragment.sh vignette viewer date' >&2
+    echo "usage: generate-img-fragment.sh vignette viewer date
+          Retourne le code HTML d'inclusion d'une vignette donnée." >&2
 }
 
 if [ $# -ne 1 ]; then
