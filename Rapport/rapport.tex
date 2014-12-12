@@ -60,7 +60,7 @@
 %%%%%%%%%%
 % EN-TÊTES ET PIED DE PAGES
 
-\pagestyle{fancyplain}
+%% \pagestyle{fancyplain}
 \renewcommand{\headrulewidth}{0pt}
 \addtolength{\headheight}{1.6pt}
 \addtolength{\headheight}{2.6pt}
@@ -75,7 +75,7 @@
 
 \title{Rapport de Projet Unix Avancé\\
   ``{\em Galerie shell}'' }
-\author{\textsc{Guillaume Halb} - \textsc{Pierre Thalamy}}
+\author{\textsc{Guillaume Halb (G7)} - \textsc{Pierre Thalamy (G5)}}
 \date{\today}
 
 \begin{document}
@@ -83,16 +83,56 @@
 \maketitle
 
 Nous avons implémenté, pour les deux versions du générateur
-de galerie demandé, l'ensemble des fonctionalités demandées dans le
-sujet. Nous n'avons cependant pas essayé de faire une galerie très élégante car
+de galerie, l'ensemble des fonctionnalités indiquées dans le
+sujet. Nous avons aussi choisi de ne pas mettre l'accent sur le côté esthétique
+de la gallerie, car
 nous avons compris que là n'était pas l'objectif direct du travail. À
 l'inverse, nous avons veillé à sécuriser au maximum notre scripts et
-corrigé chaque erreur que nous avons pu rencontrer au cours du
-développement.
+à corriger chaque erreur que nous avons pu rencontrer au cours du
+développement. \\
 
 \section{Version séquentielle du générateur de galerie d'image}
 
+\subsection{Structure du générateur de galerie}
+
+Dans la version shell du générateur, nous avons organisé notre code
+avec une fonction pour chaque étape de la génération :
+\begin{enumerate}
+  \item \lstinline!parse_args (Arguments du script)! 
+    –– Parsing des arguments.
+  \item \lstinline!init ()! –– Initialisation de l'arborescence
+    et des variables.
+  \item \lstinline!print_index_header ()! –– Écriture de l'entête HTML de
+    l'index.
+  \item \lstinline!generate_thumbs ()! –– Génèration de toutes les vignettes.
+  \item \lstinline!include_images ()! –– Inclusion des vignettes dans
+    l'index.
+  \item \lstinline!print_index_footer ()! –– Fermeture du code HTML de
+    l'index.
+  \item \lstinline!open_gallery ()! –– Ouverture de la galerie dans le
+    navigateur si l'option \lstinline!-o! est spécifiée.
+\end{enumerate}
+
+\subsection{Testing du code}
+Nous avons réalisé comme demandé un panel de fichiers de test
+permettant d'attester du bon fonctionnement de la galerie d'image dans
+différents cas, à savoir :
+\begin{itemize}
+  \item Chemins des répertoires source et destination relatifs et
+    absolus.
+  \item Espaces dans les noms de tous fichiers et répertoires
+    manipulés.
+  \item Un panel de caractère spéciaux dans les noms d'images.
+  \item Exécution à sec, aucun fichier ne doit être généré.
+  \item Test de la verbose et modificateur \lstinline'--open'
+  \item Différentes configurations de fichiers dans les répertoires
+    source et destination.
+\end{itemize}
+
 \section{Version parallèle grâce au Makefile}
+
+\subsection{Structure du Makefile}
+
 Pour cette version du générateur, nous avons décidé d'ajouter quelques
 éléments en plus que ce qui était demandé dans le sujet, à savoir la
 création d'une arborescence dans le repertoire de destination, et de
@@ -102,12 +142,12 @@ espace. Ceci a été fait dans un effort d'harmonisation avec l'autre
 version du générateur. \\  
 
 D'un point de vue programmation, nous avons utilisé des
-\lstinline!pattern-rules! afin de génerer de façon convéniente les
+\lstinline!pattern-rules! afin de générer de façon commode les
 fichiers nécessaires à la galerie. Les différents appels de scripts
 sont identiques à ceux fait par la version séquentielle, on obtient
-donc normalement une galerie d'image identique pour un même répertoire
-source (Sauf dans le cas où ce dernier contient des images au nom
-tordu). \\
+donc normalement une galerie d'image semblable pour un même répertoire
+source (Sauf dans le cas où ce dernier contient des images aux noms
+non pris en charge par le Makefile). \\
 
 \begin{figure}[!h]
 \begin{center}
@@ -117,30 +157,39 @@ tordu). \\
 \label{fig:makefile_graph}
 \end{figure}
 
-La Figure ~\ref{fig:makefile_graph} montre de quelle façon est
+La Figure~\ref{fig:makefile_graph} montre de quelle façon est
 structuré notre Makefile, par soucis de clarté du schéma, les dépendances entre
 \lstinline!TREE_DIR! et toutes les cibles secondaires, ainsi que les
 règles de cleaning et exiftags n'ont pas été représentées.
 
-Nous avons effectué des mesures de performance de la genération de
-gallerie avec divers degrés de parallélisme et 15 ou 100 images, nos
-résultats sont observable en Figure ~\ref{fig:time_graph}. 
-Quelque soit le nombre d'images, sur la machine ayant effectué les
-tests, on obtient un minimum à N = 7 processus en parallèle.\\   
+\subsection{Analyse de l'efficacité du parallélisme}
 
-\underline{\textbf{Réponse Q5.1: }}Le problème avec le Makefile
-exiftags est qu'il manque un fichier de header dans la variable
-\lstinline!HRDS!, ce qui signifie que si ce fichier est modifié, cela
-n'entrainera pas la recompilation du programme. Il suffit de rajouter
-\lstinline!timevary.h! à \lstinline!HRDS! pour palier au problème.
+Nous avons effectué des mesures de performance de la génération de
+galerie avec divers degrés de parallélisme \lstinline!N! 
+et 15 ou 100 images. Nos
+résultats sont observable en Figure~\ref{fig:time_graph}. 
+Quelque soit le nombre d'images, sur la machine ayant effectué les
+tests, on obtient un minimum à \lstinline!N = 7! processus en
+parallèle. Il semblerait que l'efficacité du parallélisme croît
+avec \lstinline!N! jusqu'à ce que ce dernier soit égale au nombre de
+threads maximal (en fonction du nombre de cœurs et HyperThreading) 
+que la machine peut exécuter simultanément. Au delà de ce nombre, nous
+supposons que c'est l'ordonnancement devant être mis en place qui influe
+négativement sur l'efficacité du parallélisme.\\   
 
 \begin{figure}[!h]
 \begin{center}
-  \includegraphics[width=12 cm]{time120-15chart.pdf}
+  \includegraphics[width=12 cm]{time120-15chart_enhanced.pdf}
   \caption{Temps d'exécution de make en fonction du degré de
     parallélisme et du nombre d'images}
 \end{center}
 \label{fig:time_graph}
 \end{figure}
+
+\subsection{Correction du Makefile exiftags}Le problème avec le Makefile
+exiftags était qu'il manquait un fichier de header dans la variable
+\lstinline!HRDS!, ce qui signifie que si ce fichier était modifié, cela
+n'aurait pas entrainé la recompilation du programme. Il a suffit de rajouter
+\lstinline!timevary.h! à \lstinline!HRDS! pour palier au problème.
 
 \end{document}
