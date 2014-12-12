@@ -25,7 +25,7 @@ bindir=$(DESTDIR)$(prefix)/bin
 mandir=$(datadir)/man
 
 OBJS=exif.o tagdefs.o exifutil.o exifgps.o jpeg.o
-HDRS=exif.h exifint.h jpeg.h makers.h
+HDRS=exif.h exifint.h jpeg.h makers.h timevary.h
 
 
 .SUFFIXES: .o .c
