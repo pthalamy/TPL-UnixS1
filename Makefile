@@ -14,8 +14,8 @@ IMAGE_VIEWERS=$(SOURCE_IMAGES:%.jpg=$(DEST)/viewers/%.html)
 TREE_DIRS=$(DEST)/vignettes/ $(DEST)/viewers/ $(DEST)/images/ $(DEST)/includes/
 
 .PHONY: gallery
-gallery: $(TREE_DIRS) $(DEST)/index.html $(IMAGE_VIEWERS) $(DEST_IMAGES) \
-	$(THUMBS)
+gallery: $(TREE_DIRS) $(DEST)/index.html $(DEST_IMAGES) \
+	$(THUMBS) $(IMAGE_VIEWERS)
 
 .PHONY: view
 view: gallery 
@@ -43,7 +43,7 @@ $(DEST)/viewers/%.html: $(DEST)/images/%.jpg $(TREE_DIRS) ./exiftags
 
 $(DEST)/images/%.jpg: $(SOURCE)/%.jpg $(TREE_DIRS)
 	cp $(SOURCE)/$*.jpg $(DEST)/images/
-	convert -resize "800x600>" $(DEST)/images/$*.jpg \
+	convert -resize "650x412>" $(DEST)/images/$*.jpg \
 		$(DEST)/images/$*.jpg	
 
 .PHONY: clean
