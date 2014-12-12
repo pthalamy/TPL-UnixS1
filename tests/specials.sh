@@ -8,8 +8,8 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 PATH="$HERE/..:$PATH"
 
 index='index espace.html'
-src='source dir/'
-dest='dest dir/'
+src='source dir'
+dest='dest dir'
 
 rm -fr "$src" "$dest"
 mkdir -p "$src" "$dest"
@@ -20,7 +20,7 @@ make-img.sh "$src/image3* *.jpg"
 make-img.sh "$src/image4.jpg"
 
 gallery-shell.sh --source "$src" --destination "$dest" \
-    -mf "$index" -v
+    -mf "$index" -v -o
 
 if [ -f "$dest/$index" ]
 then

@@ -1,6 +1,12 @@
 #! /bin/sh
 
-# Test sur un répertoire source dont l'un des fichiers contient une étoile.
+# Test très simple qui teste gallery-shell avec :
+# Répertoire source :
+#  - vide
+#  - chemin relatif
+# Répertoire destination :
+#  - existant avant le lancement du script, vide.
+#  - chemin relatif
 
 HERE=$(cd "$(dirname "$0")" && pwd)
 PATH="$HERE/..:$PATH"
@@ -8,10 +14,7 @@ PATH="$HERE/..:$PATH"
 rm -fr source dest
 mkdir -p source dest
 
-make-img.sh source/image-\*.jpg
-make-img.sh source/image2.jpg
-
-gallery-shell.sh --source source --destination dest 
+gallery-shell.sh -v --source source --destination dest
 
 if [ -f dest/index.html ]
 then
