@@ -45,7 +45,7 @@ parse_args () {
 		exit 0
 		;;
             "--source" | "--src" | "-s")
-		shift; src="${1%/}"
+		shift; src=$(cd "${1%/}" && pwd)
 		;;
             "--destination" | "--dest" | "-d")
 		shift; 
@@ -140,22 +140,22 @@ print_index_header () {
     fi
 }
 
-# Generation des vignettes pour chaque image jpeg de src
+# Generation des vignettes pour chaque image jpg de src
 generate_thumbs () {
     printf "* Generation des vignettes... \n"
 
-    for file in "$src"/*; do
+    for file in "$src"/*.jpg; do
 	filename="$(basename "$file")"
 
 	# Copie de l'image dans $dest/images/ si inexistante
 	# Et redimensionnement si plus grande que 800x600
 	if ! [ -f "$dest"/images/"$filename" ]; then
 	    echo "cp $file $dest/images" >&3
-	    $dry_run cp "$file" "$dest"/images/
+	    $dry_run cp "$file" "$dest/images/"
 	    echo 'convert -resize "800x600>" '"$dest/images/$filename" \
 		"$dest/images/$filename"
-	    $dry_run convert -resize "800x600>" "$dest"/images/"$filename" \
-		"$dest"/images/"$filename"
+	    $dry_run convert -resize "800x600>" "$dest/images/$filename" \
+		"$dest/images/$filename"
 	fi
 	
 	# Si la vignette n'existe pas, la creer
