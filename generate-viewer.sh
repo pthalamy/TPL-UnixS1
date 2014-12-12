@@ -19,15 +19,15 @@ img_list=$(cd "$DEST"/images && ls *.jpg)
 
 # Récuperation de la première et dernière image de la liste
 current="$(basename "$2")"
-first=$(echo $img_list | cut -f1 -d ' ')
+first="$(cd "$DEST"/images && ls *.jpg | sed -n 1p)"
 for _last in $img_list; do true; done # !Hack!
 last="$_last"
 
-prev=$(echo "$img_list" | grep -F "$current" -B 1 | head -n 1)
-prev=${prev%.*}
+prev="$(echo "$img_list" | grep -F "$current" -B 1 | head -n 1)"
+prev="${prev%.*}"
 
-next=$(echo "$img_list" | grep -F "$current" -A 1 | tail -n 1)
-next=${next%.*}
+next="$(echo "$img_list" | grep -F "$current" -A 1 | tail -n 1)"
+next="${next%.*}"
 
 # Formatage de la date pour la légende
 date=$(exif_date "$DIR" "$DEST/images/$current") 
@@ -45,10 +45,12 @@ html_viewer_title "$title"
 # Affichage du code HTML
 echo '<center>'
 echo '<div class="imgframe">'
-echo '<img class="image" src="'$(FileRelative2Absolute "$2")'"><br>'
+echo '<img class="image" src="'"$(FileRelative2Absolute "$2")"'"><br>'
 echo '<span class="legend">'"$legend"'</span>'
 echo '</div>' 
 echo '</center>'
+
+echo '$current='"$current"' $first='"$first">&2
 
 # Affichage des menus de navigation
 if ! [ "$current" = "$first" ]; then
