@@ -11,7 +11,7 @@ if [ $# -ne 1 ]; then
 	legend="$(basename "$2" .html)"
 
 	echo '<div class="vgframe">'
-	echo '<a href="'$2'" target="_top">'
+	echo '<a href="'"$2"'" target="_top">'
 	echo '<img class="image" '
 	echo 'alt="'"$(basename "$1" .jpg)"'" '
 	echo 'src="'"$(FileRelative2Absolute "$1")"'"><br>'
