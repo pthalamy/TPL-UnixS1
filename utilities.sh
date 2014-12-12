@@ -1,3 +1,4 @@
+
 html_head () {
     cat << EOF
 	   <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
@@ -27,8 +28,8 @@ EOF
       .imgframe {
       float: center;
       text-align:center;
-      height: 650px;
-      width: 850px;
+      height: 450px;
+      width: 700px;
       }
 
       .image {
@@ -39,10 +40,10 @@ EOF
 
       .legend {
       font-style:italic;
-      font-size:25px;
+      font-size:20px;
       background-color: white;
       border: 1px #BBDDBB;
-      margin: 4px;
+      margin: 1px;
       padding: 1px;
       color: #002000;
       }
